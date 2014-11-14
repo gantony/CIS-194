@@ -51,6 +51,16 @@ sumDigits list = sum . concat $ map toDigits list
 validate :: Integer -> Bool
 validate n = mod (sumDigits . doubleEveryOther $ toDigits n) 10 == 0
 
+
+-- Exercise 5
+
+type Peg = String
+type Move = (Peg, Peg)
+
+hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
+hanoi 1 a b c = [(a, b)]
+hanoi n a b c = hanoi (n-1) a c b ++ [(a, b)] ++ hanoi (n-1) c b a
+
 -- Tests
 
 testCharToString = TestCase $ assertEqual 
@@ -91,7 +101,18 @@ testValidate = TestList [
         "returns false if the number is invalid" False (validate 4012888888881882)
     ]
 
-creditCardTests = TestList [testCharToString, testCharToInt, testToDigits, testDoubleEveryOther, testSumDigits, testValidate] 
+testHanoi = TestCase $ assertEqual 
+        "return correct list of moves for hanoi with 3 pegs and 2 discs" [("a","c"),("a","b"),("c","b")] (hanoi 2 "a" "b" "c")
+
+creditCardTests = TestList [
+    testCharToString, 
+    testCharToInt,
+    testToDigits,
+    testDoubleEveryOther,
+    testSumDigits,
+    testValidate,
+    testHanoi
+    ] 
 
 
 main = runTestTT $ TestList [creditCardTests]
