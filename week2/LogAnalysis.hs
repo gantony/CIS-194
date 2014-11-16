@@ -28,3 +28,19 @@ parseMessage text =
 
 parse :: String -> [LogMessage]
 parse text = map parseMessage (lines text)
+
+--isUnknown :: LogMessage -> Bool
+--isUnknown (Unknown _) = True
+--isUnknown _ = False
+
+--getTimestamp :: MessageTree -> TimeStamp
+--getTimestamp (Node leftTree (LogMessage _ timestamp _) rightTree) = timestamp
+
+insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) messageTree = messageTree
+insert logMessage (Leaf) = (Node Leaf logMessage Leaf)
+insert (LogMessage logMT timestamp logString) (Node leftTree (LogMessage nodeMT nodeTimestamp nodeString) rightTree) 
+     | timestamp < nodeTimestamp = (Node (insert (LogMessage logMT timestamp logString) leftTree) (LogMessage nodeMT nodeTimestamp nodeString) rightTree)
+     | otherwise                 = (Node leftTree (LogMessage nodeMT nodeTimestamp nodeString) (insert (LogMessage logMT timestamp logString) rightTree))
+insert _ (Node _ (Unknown _) _) = error "Invalid Tree!" 
+
