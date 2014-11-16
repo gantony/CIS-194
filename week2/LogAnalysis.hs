@@ -29,18 +29,43 @@ parseMessage text =
 parse :: String -> [LogMessage]
 parse text = map parseMessage (lines text)
 
---isUnknown :: LogMessage -> Bool
---isUnknown (Unknown _) = True
---isUnknown _ = False
 
---getTimestamp :: MessageTree -> TimeStamp
---getTimestamp (Node leftTree (LogMessage _ timestamp _) rightTree) = timestamp
+logTimestampOf :: LogMessage -> Maybe TimeStamp
+logTimestampOf (Unknown _) = Nothing
+logTimestampOf (LogMessage _ timestamp _) = Just timestamp
+
+nodeTimestampOf :: MessageTree -> Maybe TimeStamp
+nodeTimestampOf (Node _ (LogMessage _ timestamp _) _) = Just timestamp
+nodeTimestampOf _ = Nothing
 
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) messageTree = messageTree
 insert logMessage (Leaf) = (Node Leaf logMessage Leaf)
-insert (LogMessage logMT timestamp logString) (Node leftTree (LogMessage nodeMT nodeTimestamp nodeString) rightTree) 
-     | timestamp < nodeTimestamp = (Node (insert (LogMessage logMT timestamp logString) leftTree) (LogMessage nodeMT nodeTimestamp nodeString) rightTree)
-     | otherwise                 = (Node leftTree (LogMessage nodeMT nodeTimestamp nodeString) (insert (LogMessage logMT timestamp logString) rightTree))
-insert _ (Node _ (Unknown _) _) = error "Invalid Tree!" 
+insert logMessage (Node leftTree nodeMessage rightTree) 
+     | timestamp < nodeTimestamp = (Node (insert logMessage leftTree) nodeMessage rightTree)
+     | otherwise                 = (Node leftTree nodeMessage (insert logMessage rightTree))
+    where timestamp     = logTimestampOf logMessage
+          nodeTimestamp = nodeTimestampOf (Node leftTree nodeMessage rightTree)
 
+
+build :: [LogMessage] -> MessageTree
+build list = foldl (flip insert) (Leaf) list 
+
+
+inOrder :: MessageTree -> [LogMessage]
+inOrder (Node leftTree nodeMessage rightTree) = (inOrder leftTree) ++ [nodeMessage] ++ (inOrder rightTree)
+inOrder (Leaf) = []
+
+
+highPriority :: LogMessage -> Bool
+highPriority (LogMessage (Error severity) _ _) = severity > 50
+highPriority _ = False
+
+errorToString :: LogMessage -> String
+errorToString (LogMessage (Error _) _ text) = show text 
+errorToString _ = error "Only expecting error messages"
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong messages = map errorToString highPriorityMessages
+    where messagesInOrder = inOrder (build messages) 
+          highPriorityMessages = filter (highPriority) messagesInOrder
