@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 module Golf where
 
+import Data.List
+
 
 -- Exercise 1
 
@@ -33,3 +35,40 @@ isMaxima (Triplet a b c) = b > a && b > c
 localMaxima :: [Integer] -> [Integer]
 localMaxima list = map single $ filter isMaxima (triplets list)
 
+
+-- Exercise 3
+
+data Histogram = Histogram Integer Integer Integer Integer Integer Integer Integer Integer Integer Integer
+               deriving Show
+
+numOccurences :: [Integer] -> Integer -> Integer
+numOccurences list x = toInteger $ length $ elemIndices x list
+
+numElements :: [Integer] -> [Integer]
+numElements list = [n 0, n 1, n 0, n 3, n 4, n 5, n 6, n 7, n 8, n 9]
+                 where n x = numOccurences list x
+
+toChars :: Integer -> String
+toChars n = take (fromIntegral  n) $ repeat '*'
+
+elemStrings :: [Integer] -> [String]
+elemStrings list = map toChars (numElements list)
+
+fullElemStrings :: [String] -> Integer -> [String]
+fullElemStrings strings m = map (\ s -> (take (fromIntegral (m - (fromIntegral (length s)))) $ repeat ' ') ++ s) strings 
+
+getMax :: [String] -> Int
+getMax strings = maximum $ map length strings
+
+hozLines :: [Integer] -> [String]
+hozLines list = fullElemStrings strings ( fromIntegral (getMax strings))
+              where strings = elemStrings list
+
+vertLines :: [Integer] -> [String]
+vertLines list = transpose $ hozLines list
+
+vertLinesBroken :: [Integer] -> [String]
+vertLinesBroken list = map (\s -> s ++ "\n") (transpose $ hozLines list)
+
+histogram :: [Integer] -> String
+histogram list = concat $ (vertLinesBroken list) ++ ["==========\n"] ++ ["0123456789\n"]
