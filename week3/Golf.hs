@@ -38,37 +38,23 @@ localMaxima list = map single $ filter isMaxima (triplets list)
 
 -- Exercise 3
 
-data Histogram = Histogram Integer Integer Integer Integer Integer Integer Integer Integer Integer Integer
-               deriving Show
+numOccurences :: [Int] -> Int -> Int
+numOccurences list x = length $ elemIndices x list
 
-numOccurences :: [Integer] -> Integer -> Integer
-numOccurences list x = toInteger $ length $ elemIndices x list
-
-numElements :: [Integer] -> [Integer]
+numElements :: [Int] -> [Int]
 numElements list = [n 0, n 1, n 0, n 3, n 4, n 5, n 6, n 7, n 8, n 9]
-                 where n x = numOccurences list x
+                 where n = numOccurences list   -- partially applied function
 
-toChars :: Integer -> String
-toChars n = take (fromIntegral  n) $ repeat '*'
+mkStr :: Int -> Char -> String
+mkStr n c = take n $ repeat c
 
-elemStrings :: [Integer] -> [String]
-elemStrings list = map toChars (numElements list)
-
-fullElemStrings :: [String] -> Integer -> [String]
-fullElemStrings strings m = map (\ s -> (take (fromIntegral (m - (fromIntegral (length s)))) $ repeat ' ') ++ s) strings 
-
-getMax :: [String] -> Int
-getMax strings = maximum $ map length strings
-
-hozLines :: [Integer] -> [String]
-hozLines list = fullElemStrings strings ( fromIntegral (getMax strings))
-              where strings = elemStrings list
-
-vertLines :: [Integer] -> [String]
-vertLines list = transpose $ hozLines list
-
-vertLinesBroken :: [Integer] -> [String]
-vertLinesBroken list = map (\s -> s ++ "\n") (transpose $ hozLines list)
+hozLines :: [Int] -> [String]
+hozLines list = map (\n -> mkStr (m - n) ' ' ++ mkStr n '*') (numElements list)
+              where m = maximum list
+                    
+vertLines :: [Int] -> [String]
+vertLines list = map (\s -> s ++ "\n") (transpose $ hozLines list)
 
 histogram :: [Integer] -> String
-histogram list = concat $ (vertLinesBroken list) ++ ["==========\n"] ++ ["0123456789\n"]
+histogram list = concat $ (vertLines intList) ++ ["==========\n0123456789\n"]
+                 where intList = map fromIntegral list
