@@ -18,12 +18,38 @@ fun1' list = foldr (*) 1 . map (subtract 2) $ filter even list
 -- import Test.QuickCheck
 -- quickCheck (\xs -> fun1 xs == fun1' xs)
 
--- Come back to fun2 later
+fun2 :: Integer -> Integer
+fun2 1 = 0
+fun2 n 
+    | even n    = n + fun2 (n `div` 2)
+    | otherwise = fun2 (3 * n + 1)
 
 
 -- Exercise 2
 
--- Started on another computer I think
+data Tree a = Leaf
+            | Node Integer (Tree a) a (Tree a)
+            deriving (Show, Eq)
+
+addNode :: Tree a -> a -> Tree a
+addNode Leaf a = Node 0 Leaf a Leaf
+addNode (Node _ Leaf x Leaf) y = (Node 1 (Node 0 Leaf y Leaf) x Leaf)
+addNode (Node n (Node l lt1 ltv lt2) x Leaf) y = (Node n (Node l lt1 ltv lt2) x (Node 0 Leaf y Leaf))
+addNode (Node n Leaf x (Node r rt1 rtv rt2)) y = (Node n (Node 0 Leaf y Leaf) x (Node r rt1 rtv rt2))
+addNode (Node n (Node l lt1 ltv lt2) x (Node r rt1 rtv rt2)) y 
+    | l < r     = (Node (n+1) (addNode (Node l lt1 ltv lt2) y) x (Node r rt1 rtv rt2)) 
+    | otherwise = (Node (n+1) (Node l lt1 ltv lt2) x (addNode (Node r rt1 rtv rt2) y)) 
+
+foldTree :: [a] -> Tree a
+foldTree list = foldl addNode Leaf (reverse list)
+
+--depth :: Tree a -> Integer 
+--depth Leaf _ = 0
+--depth (Node d _ _ _) _ = d
+
+--insert :: Tree a -> a -> Tree a
+--insert Leaf a = Node 0 Leaf a Leaf
+--insert tree a = 
 
 
 -- Exercise 3
@@ -42,4 +68,3 @@ map'' f = foldr ((:) . f) []    -- Same as map', but the result of f is fed as a
 
 map''' :: (a -> b) -> [a] -> [b]
 map''' f = foldr (\ x -> ((f x) : ) ) []    -- This works too, and could be an intermediary step to get to map'' from map', using currying
-
