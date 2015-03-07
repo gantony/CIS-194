@@ -10,6 +10,7 @@ eval (Lit x) = x
 eval (Add a b) = eval a + eval b
 eval (Mul a b) = eval a * eval b
 
+-- https://wiki.haskell.org/Maybe
 evalStr :: String -> Maybe Integer
 evalStr string = case parseExp Lit Add Mul string of
 	Just expression -> Just (eval expression)
