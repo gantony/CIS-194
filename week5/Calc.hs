@@ -16,3 +16,15 @@ evalStr string = case parseExp Lit Add Mul string of
 	Just expression -> Just (eval expression)
 	Nothing -> Nothing
 
+reify :: ExprT -> ExprT
+reify = id
+
+class Expr a where
+	lit :: Integer -> a
+	add :: a -> a -> a
+	mul :: a -> a -> a
+
+instance Expr ExprT where
+	lit x = (Lit x)
+	add a b = (Add a b)
+	mul a b =  (Mul a b)
