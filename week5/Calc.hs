@@ -1,8 +1,10 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module Calc where
 
 import ExprT
 import Parser
+import qualified StackVM as S
 
 
 eval :: ExprT -> Integer
@@ -15,6 +17,7 @@ evalStr :: String -> Maybe Integer
 evalStr string = case parseExp Lit Add Mul string of
 	Just expression -> Just (eval expression)
 	Nothing -> Nothing
+
 
 reify :: ExprT -> ExprT
 reify = id
@@ -61,3 +64,12 @@ instance Expr Mod7 where
 
 testExp :: Expr a => Maybe a
 testExp = parseExp lit add mul "(3 * -4) + 5"
+
+
+instance Expr S.Program where
+	lit x = [S.PushI x]
+	add a b = a ++ b ++ [S.Add]
+	mul a b = a ++ b ++ [S.Mul]
+
+compile :: String -> Maybe S.Program
+compile s = parseExp lit add mul s
