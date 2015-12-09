@@ -35,3 +35,12 @@ streamMap f (Cons x xs) = (Cons (f x) (streamMap f xs))
 
 streamFromSeed :: (a -> a) -> a -> Stream a
 streamFromSeed f x = (Cons x (streamFromSeed f (f x)))
+
+
+nats :: Stream Integer
+nats = streamFromSeed (+1) 1
+
+powersOf2 :: Stream Integer
+powersOf2 = streamMap ((2::Integer)^) nats
+
+--ruler :: Stream Integer
